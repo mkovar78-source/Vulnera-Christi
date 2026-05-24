@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sv. Brigita">
+<meta name="theme-color" content="#1C1714">
+<title>12 ročná pobožnosť sv. Brigity</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --gold: #B8976A;
+  --gold-light: #D4B896;
+  --gold-dark: #8A6E4A;
+  --cream: #F7F3EE;
+  --parchment: #EDE7DC;
+  --ink: #1C1714;
+  --ink-soft: #5A4E46;
+  --accent: #7A3B2E;
+  --green: #3D5C37;
+  --safe-top: env(safe-area-inset-top, 44px);
+  --safe-bottom: env(safe-area-inset-bottom, 34px);
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--ink);
+  font-family: -apple-system, 'Georgia', serif;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: var(--cream);
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+}
+
+/* TOP BAR */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(var(--safe-top) + 10px) 18px 12px;
+  background: var(--ink);
+  flex-shrink: 0;
+  min-height: calc(var(--safe-top) + 52px);
+}
+
+.top-title {
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  color: var(--gold-light);
+  text-transform: uppercase;
+  font-family: -apple-system, sans-serif;
+  font-weight: 300;
+}
+
+.slide-counter {
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 400;
+  letter-spacing: 1px;
+  font-family: -apple-system, sans-serif;
+}
+
+/* DOTS */
+.dots-row {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #3A3028;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.dot.active {
+  background: var(--gold);
+  width: 16px;
+  border-radius: 3px;
+}
+
+/* SLIDE CONTAINER */
+.slide-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateX(50px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+.slide.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: all;
+}
+
+.slide.exit-left {
+  opacity: 0;
+  transform: translateX(-50px);
+}
+
+.slide-inner {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 22px 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.slide-inner::-webkit-scrollbar { display: none; }
+
+/* TYPOGRAPHY */
+.slide-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 400;
+  margin-bottom: 6px;
+  font-family: -apple-system, sans-serif;
+}
+
+.slide-heading {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 28px;
+  font-weight: normal;
+  color: var(--ink);
+  line-height: 1.2;
+  margin-bottom: 14px;
+}
+
+.divider {
+  width: 36px;
+  height: 1px;
+  background: var(--gold);
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.prayer-intro {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--gold-dark);
+  margin-bottom: 14px;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.prayer-text {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 17px;
+  color: var(--ink-soft);
+  line-height: 1.8;
+}
+
+/* STATS SLIDE */
+.streak-block {
+  text-align: center;
+  padding: 8px 0 12px;
+}
+
+.streak-num {
+  font-family: Georgia, serif;
+  font-size: 56px;
+  color: var(--ink);
+  font-weight: normal;
+  line-height: 1;
+}
+
+.streak-sub {
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 4px;
+  font-family: -apple-system, sans-serif;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.stat-card {
+  background: var(--parchment);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+}
+
+.stat-value {
+  font-family: Georgia, serif;
+  font-size: 30px;
+  color: var(--ink);
+  font-weight: normal;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--ink-soft);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 5px;
+  font-family: -apple-system, sans-serif;
+}
+
+.progress-wrap {
+  background: var(--parchment);
+  border-radius: 8px;
+  height: 8px;
+  margin: 6px 0 14px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+  border-radius: 8px;
+  transition: width 0.5s ease;
+}
+
+.years-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-bottom: 5px;
+  font-family: -apple-system, sans-serif;
+}
+
+.info-box {
+  background: var(--parchment);
+  border-left: 2px solid var(--gold);
+  border-radius: 0 8px 8px 0;
+  padding: 11px 14px;
+  margin: 10px 0;
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+/* PROMISE LIST */
+.promise-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 8px 0;
+}
+
+.promise-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
+.promise-num {
+  font-size: 11px;
+  color: var(--gold);
+  font-family: -apple-system, sans-serif;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-top: 4px;
+  letter-spacing: 0.5px;
+}
+
+/* START DATE */
+.start-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 10px 0 4px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-family: -apple-system, sans-serif;
+}
+
+.tag {
+  background: var(--parchment);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: var(--gold-dark);
+  font-weight: 500;
+}
+
+.change-link {
+  background: none;
+  border: none;
+  color: var(--gold);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: -apple-system, sans-serif;
+  text-decoration: underline;
+  padding: 0;
+}
+
+/* CHECK BUTTON */
+.check-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 50px;
+  border: none;
+  background: var(--accent);
+  color: #F7EDE8;
+  font-family: -apple-system, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.2s;
+  margin: 14px auto 0;
+  width: 100%;
+  max-width: 280px;
+  -webkit-appearance: none;
+}
+
+.check-btn.done {
+  background: var(--green);
+  color: #EAF3DE;
+}
+
+.check-btn:active { transform: scale(0.96); }
+
+/* BOTTOM NAV */
+.nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px calc(var(--safe-bottom) + 10px);
+  background: var(--cream);
+  border-top: 1px solid var(--parchment);
+  flex-shrink: 0;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 22px;
+  border-radius: 50px;
+  border: 1px solid var(--gold);
+  background: transparent;
+  color: var(--gold-dark);
+  font-family: -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.2s;
+  -webkit-appearance: none;
+}
+
+.nav-btn.primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--gold-light);
+}
+
+.nav-btn:disabled {
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.nav-btn:active { transform: scale(0.96); }
+
+/* TOUCH SWIPE AREA */
+.slide-container { touch-action: pan-y; }
+
+/* MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--cream);
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.modal h3 {
+  font-family: Georgia, serif;
+  font-size: 20px;
+  color: var(--ink);
+  margin-bottom: 12px;
+  font-weight: normal;
+}
+
+.modal p {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin-bottom: 16px;
+  font-family: -apple-system, sans-serif;
+  line-height: 1.5;
+}
+
+.modal input[type="date"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--gold);
+  border-radius: 10px;
+  background: var(--parchment);
+  color: var(--ink);
+  font-size: 16px;
+  font-family: -apple-system, sans-serif;
+  margin-bottom: 16px;
+  -webkit-appearance: none;
+}
+
+.modal-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--gold);
+  background: transparent;
+  color: var(--gold-dark);
+  font-size: 15px;
+  font-family: -apple-system, sans-serif;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+
+.modal-btn.confirm {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--gold-light);
+}
+
+/* AMEN */
+.amen {
+  display: block;
+  margin-top: 20px;
+  text-align: center;
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 20px;
+  color: var(--gold);
+  letter-spacing: 2px;
+}
+
+.prayer-block {
+  background: var(--parchment);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.prayer-title {
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-family: -apple-system, sans-serif;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.prayer-small {
+  font-family: Georgia, serif;
+  font-size: 14.5px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <span class="top-title">Sv. Brigita</span>
+    <div class="dots-row" id="dotsRow"></div>
+    <span class="slide-counter" id="slideCounter">1 / 10</span>
+  </div>
+
+  <!-- SLIDES -->
+  <div class="slide-container" id="slideContainer">
+
+    <!-- 0: Hlavná strana -->
+    <div class="slide active" id="slide-0">
+      <div class="slide-inner">
+        <div class="slide-label">Pobožnosť</div>
+        <div class="slide-heading">12 ročná pobožnosť sv. Brigity</div>
+        <div class="divider"></div>
+
+        <div class="streak-block">
+          <div class="streak-num" id="streakNum">0</div>
+          <div class="streak-sub">dní za sebou</div>
+        </div>
+
+        <div id="yearsBlock">
+          <div class="years-label">
+            <span id="yearLabel">Rok 1 z 12</span>
+            <span id="pctLabel">0%</span>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-fill" id="progressFill" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="daysTotal">0</div>
+            <div class="stat-label">dní celkom</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="daysLeft">4380</div>
+            <div class="stat-label">zostatok dní</div>
+          </div>
+        </div>
+
+        <div class="start-row">
+          <span>Začiatok:</span>
+          <span class="tag" id="startDateTag">nenastavené</span>
+          <button class="change-link" onclick="openModal()">zmeniť</button>
+        </div>
+
+        <div class="info-box">
+          Každý deň: 7× Otče náš a Zdravas Mária ku cti prečistej krvi Kristovej.
+        </div>
+
+        <button class="check-btn" id="todayBtn" onclick="toggleToday()">
+          <span id="todayLabel">Označiť dnešný deň</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 1: Prísľuby -->
+    <div class="slide" id="slide-1">
+      <div class="slide-inner">
+        <div class="slide-label">Prísľuby Krista</div>
+        <div class="slide-heading">Čo Kristus prisľúbil</div>
+        <div class="divider"></div>
+        <div class="info-box" style="margin-bottom:14px;font-style:normal;font-size:15px;">
+          Božský Spasiteľ prisľúbil svätej Brigite, že tým, ktorí sa po 12 rokov denne pomodlia 7-ráz Otče náš a Zdravas Mária ku cti jeho prečistej krvi, udelí tieto milosti:
+        </div>
+        <ul class="promise-list">
+          <li class="promise-item"><span class="promise-num">1.</span><span>Neprídu do očistca.</span></li>
+          <li class="promise-item"><span class="promise-num">2.</span><span>Prijmem ich do počtu mučeníkov tak, akoby vyliali svoju krv za vieru.</span></li>
+          <li class="promise-item"><span class="promise-num">3.</span><span>Trom príbuzným, podľa voľby dotyčného, udelím milosť vytrvania v stave posväcujúcej milosti.</span></li>
+          <li class="promise-item"><span class="promise-num">4.</span><span>Duše jeho príbuzných až do štvrtého pokolenia uchránim od pekla.</span></li>
+          <li class="promise-item"><span class="promise-num">5.</span><span>Budú mesiac pred smrťou upovedomení o jej príchode.</span></li>
+        </ul>
+        <div class="info-box">
+          Ak by dotyčný zomrel pred uplynutím týchto 12 rokov, aj tak budem považovať podmienky za splnené.
+        </div>
+        <div class="info-box" style="margin-top:8px;">
+          Každý Veľký piatok vyslobodia jednu dušu z očistca.
+        </div>
+      </div>
+    </div>
+
+    <!-- 2: Úvodná modlitba -->
+    <div class="slide" id="slide-2">
+      <div class="slide-inner">
+        <div class="slide-label">Pred začatím</div>
+        <div class="slide-heading">Úvodná modlitba</div>
+        <div class="divider"></div>
+        <div class="prayer-text">
+          Ó, Ježišu, chcem sa teraz sedem ráz pomodliť Otče náš a Zdravas Mária v zjednotení s tou láskou, ktorou si túto pobožnosť vo svojom srdci posvätil a osladil. Prijmi ju z mojich úst do svojho Božského srdca, vylepši a zdokonaľ ju tak, aby pripravila Najsvätejšej Trojici takú česť a radosť, aké si jej Ty pripravil na zemi. Nech sa preleje na Tvoje presväté človečenstvo k oslave Tvojich svätých rán a drahocennej krvi, ktorú si za nás vylial.
+        </div>
+      </div>
+    </div>
+
+    <!-- 3: Obriezka -->
+    <div class="slide" id="slide-3">
+      <div class="slide-inner">
+        <div class="slide-label">1. tajomstvo</div>
+        <div class="slide-heading">Obriezka</div>
+        <div class="divider"></div>
+        <div class="prayer-block">
+          <div class="prayer-title">Otče náš</div>
+          <div class="prayer-small">Otče náš, ktorý si na nebesiach, posväť sa meno Tvoje, príď kráľovstvo Tvoje, buď vôľa Tvoja ako v nebi tak i na zemi. Chlieb náš každodenný daj nám dnes a odpusť nám naše viny, ako i my odpúšťame svojim vinníkom, a neuveď nás do pokušenia, ale zbav nás Zlého. Amen.</div>
+          <div class="prayer-title" style="margin-top:12px;">Zdravas Mária</div>
+          <div class="prayer-small">Zdravas Mária, milosti plná, Pán s Tebou, požehnaná si medzi ženami a požehnaný je plod života Tvojho, Ježiš. Svätá Mária, Matka Božia, pros za nás hriešnych teraz i v hodinu smrti našej. Amen.</div>
+        </div>
+        <div class="prayer-text">
+          Večný Otče. Skrze Nepoškvrnené ruky Panny Márie a skrze Božské srdce Ježišovo, obetujem ti prvé rany, prvé bolesti a prvé krvipreliatie Ježišovo za svoje hriechy, za hriechy mladosti všetkých ľudí a k zamedzeniu prvých ťažkých hriechov, najmä v svojom príbuzenstve.
+        </div>
+      </div>
+    </div>
+
+    <!-- 4: Olivová hora -->
+    <div class="slide" id="slide-4">
+      <div class="slide-inner">
+        <div class="slide-label">2. tajomstvo</div>
+        <div class="slide-heading">Olivová hora</div>
+        <div class="divider"></div>
+        <div class="prayer-block">
+          <div class="prayer-title">Otče náš</div>
+          <div class="prayer-small">Otče náš, ktorý si na nebesiach, posväť sa meno Tvoje, príď kráľovstvo Tvoje, buď vôľa Tvoja ako v nebi tak i na zemi. Chlieb náš každodenný daj nám dnes a odpusť nám naše viny, ako i my odpúšťame svojim vinníkom, a neuveď nás do pokušenia, ale zbav nás Zlého. Amen.</div>
+          <div class="prayer-title" style="margin-top:12px;">Zdravas Mária</div>
+          <div class="prayer-small">Zdravas Mária, milosti plná, Pán s Tebou, požehnaná si medzi ženami a požehnaný je plod života Tvojho, Ježiš. Svätá Mária, Matka Božia, pros za nás hriešnych teraz i v hodinu smrti našej. Amen.</div>
+        </div>
+        <div class="prayer-text">
+          Večný Otče. Skrze Nepoškvrnené ruky Panny Márie a Božské srdce Ježišovo, obetujem Ti hrozné utrpenie Srdca Ježišovho na Olivovej hore, ako i každú kvapku Jeho krvi, ktorou sa potil – za hriechy môjho srdca i za hriechy všetkých ľudí. Prosím Ťa, ochraňuj nás od takých hriechov a rozmnož v nás lásku k Bohu a k blížnemu.
+        </div>
+      </div>
+    </div>
+
+    <!-- 5: Bičovanie -->
+    <div class="slide" id="slide-5">
+      <div class="slide-inner">
+        <div class="slide-label">3. tajomstvo</div>
+        <div class="slide-heading">Bičovanie</div>
+        <div class="divider"></div>
+        <div class="prayer-block">
+          <div class="prayer-title">Otče náš</div>
+          <div class="prayer-small">Otče náš, ktorý si na nebesiach, posväť sa meno Tvoje, príď kráľovstvo Tvoje, buď vôľa Tvoja ako v nebi tak i na zemi. Chlieb náš každodenný daj nám dnes a odpusť nám naše viny, ako i my odpúšťame svojim vinníkom, a neuveď nás do pokušenia, ale zbav nás Zlého. Amen.</div>
+          <div class="prayer-title" style="margin-top:12px;">Zdravas Mária</div>
+          <div class="prayer-small">Zdravas Mária, milosti plná, Pán s Tebou, požehnaná si medzi ženami a požehnaný je plod života Tvojho, Ježiš. Svätá Mária, Matka Božia, pros za nás hriešnych teraz i v hodinu smrti našej. Amen.</div>
+        </div>
+        <div class="prayer-text">
+          Večný Otče. Skrze Nepoškvrnené ruky Panny Márie a Božské srdce Ježišovo, obetujem Ti tisíce rán, hrozné bolesti a drahocennú krv, ktorú náš Pán vylial pri bičovaní za moje hriechy tela a za hriechy všetkých ľudí. Prosím Ťa, ochraňuj nás od takých hriechov a zachovaj našu nevinu.
+        </div>
+      </div>
+    </div>
+
+    <!-- 6: Korunovanie tŕním -->
+    <div class="slide" id="slide-6">
+      <div class="slide-inner">
+        <div class="slide-label">4. tajomstvo</div>
+        <div class="slide-heading">Korunovanie tŕním</div>
+        <div class="divider"></div>
+        <div class="prayer-block">
+          <div class="prayer-title">Otče náš</div>
+          <div class="prayer-small">Otče náš, ktorý si na nebesiach, posväť sa meno Tvoje, príď kráľovstvo Tvoje, buď vôľa Tvoja ako v nebi tak i na zemi. Chlieb náš každodenný daj nám dnes a odpusť nám naše viny, ako i my odpúšťame svojim vinníkom, a neuveď nás do pokušenia, ale zbav nás Zlého. Amen.</div>
+          <div class="prayer-title" style="margin-top:12px;">Zdravas Mária</div>
+          <div class="prayer-small">Zdravas Mária, milosti plná, Pán s Tebou, požehnaná si medzi ženami a požehnaný je plod života Tvojho, Ježiš. Svätá Mária, Matka Božia, pros za nás hriešnych teraz i v hodinu smrti našej. Amen.</div>
+        </div>
+        <div class="prayer-text">
+          Večný Otče. Skrze Nepoškvrnené ruky Panny Márie a Božské srdce Ježišovo, obetujem Ti rany, bolesti a drahocennú krv presvätého Ježiša, ktorý bol za nás tŕním korunovaný. Obetujem Ti to za moje hriechy ducha i za hriechy všetkých ľudí. Prosím Ťa, ochraňuj nás od takýchto hriechov a daj nám milosť rozšíriť kráľovstvo Kristovo na zemi.
+        </div>
+      </div>
+    </div>
+
+    <!-- 7: Krížová cesta -->
+    <div class="slide" id="slide-7">
+      <div class="slide-inner">
+        <div class="slide-label">5. tajomstvo</div>
+        <div class="slide-heading">Krížová cesta</div>
+        <div class="divider"></div>
+        <div class="prayer-block">
+          <div class="prayer-title">Otče náš</div>
+          <div class="prayer-small">Otče náš, ktorý si na nebesiach, posväť sa meno Tvoje, príď kráľovstvo Tvoje, buď vôľa Tvoja ako v nebi tak i na zemi. Chlieb náš každodenný daj nám dnes a odpusť nám naše viny, ako i my odpúšťame svojim vinníkom, a neuveď nás do pokušenia, ale zbav nás Zlého. Amen.</div>
+          <div class="prayer-title" style="margin-top:12px;">Zdravas Mária</div>
+          <div class="prayer-small">Zdravas Mária, milosti plná, Pán s Tebou, požehnaná si medzi ženami a požehnaný je plod života Tvojho, Ježiš. Svätá Mária, Matka Božia, pros za nás hriešnych teraz i v hodinu smrti našej. Amen.</div>
+        </div>
+        <div class="prayer-text">
+          Večný Otče. Skrze Nepoškvrnené ruky Panny Márie a Božské srdce Ježišovo, obetujem Ti Jeho utrpenie na krížovej ceste, najmä Jeho svätú ranu na ramene – ako zmierenie za moje hriechy a za hriechy všetkých ľudí. Jeho krížová cesta nech je zmierením za naše spriečenia sa proti krížu a proti svätým príkazom, ako i za všetky hriechy nášho jazyka. Zachráň nás od takýchto hriechov a nauč nás milovať Tvoj svätý kríž.
+        </div>
+      </div>
+    </div>
+
+    <!-- 8: Ukrižovanie -->
+    <div class="slide" id="slide-8">
+      <div class="slide-inner">
+        <div class="slide-label">6. tajomstvo</div>
+        <div class="slide-heading">Ježišovo ukrižovanie</div>
+        <div class="divider"></div>
+        <div class="prayer-block">
+          <div class="prayer-title">Otče náš</div>
+          <div class="prayer-small">Otče náš, ktorý si na nebesiach, posväť sa meno Tvoje, príď kráľovstvo Tvoje, buď vôľa Tvoja ako v nebi tak i na zemi. Chlieb náš každodenný daj nám dnes a odpusť nám naše viny, ako i my odpúšťame svojim vinníkom, a neuveď nás do pokušenia, ale zbav nás Zlého. Amen.</div>
+          <div class="prayer-title" style="margin-top:12px;">Zdravas Mária</div>
+          <div class="prayer-small">Zdravas Mária, milosti plná, Pán s Tebou, požehnaná si medzi ženami a požehnaný je plod života Tvojho, Ježiš. Svätá Mária, Matka Božia, pros za nás hriešnych teraz i v hodinu smrti našej. Amen.</div>
+        </div>
+        <div class="prayer-text">
+          Večný Otče. Skrze Nepoškvrnené ruky Panny Márie a Božské srdce Ježišovo, obetujem Ti Tvojho Božského Syna na kríži, Jeho ukrižovanie i Jeho pozdvihnutie. Obetujem Ti Jeho rany na rukách i nohách a tri prúdy Jeho presvätej krvi, ktorá sa vyliala za nás. Obetujem Ti Jeho chudobu, Jeho dokonalú poslušnosť, všetky Jeho duševné i telesné utrpenia, Jeho drahocennú smrť a jej nekrvavé obnovenie vo všetkých svätých omšiach na celej zemi – ako zmierenie za porušovanie rehoľných pravidiel a sľubov, za zadosťučinenie mojich hriechov i hriechov všetkých ľudí, za chorých a umierajúcich, za Tvojich kňazov i laikov, za úmysly Svätého otca, za obnovenie kresťanských rodín, za silnú vieru, za našu vlasť, za jednotu národov v Kristovi a v Jeho Cirkvi, ako i za kresťanov roztrúsených po svete.
+        </div>
+      </div>
+    </div>
+
+    <!-- 9: Prebodnutie kopijou -->
+    <div class="slide" id="slide-9">
+      <div class="slide-inner">
+        <div class="slide-label">7. tajomstvo</div>
+        <div class="slide-heading">Prebodnutie kopijou</div>
+        <div class="divider"></div>
+        <div class="prayer-block">
+          <div class="prayer-title">Otče náš</div>
+          <div class="prayer-small">Otče náš, ktorý si na nebesiach, posväť sa meno Tvoje, príď kráľovstvo Tvoje, buď vôľa Tvoja ako v nebi tak i na zemi. Chlieb náš každodenný daj nám dnes a odpusť nám naše viny, ako i my odpúšťame svojim vinníkom, a neuveď nás do pokušenia, ale zbav nás Zlého. Amen.</div>
+          <div class="prayer-title" style="margin-top:12px;">Zdravas Mária</div>
+          <div class="prayer-small">Zdravas Mária, milosti plná, Pán s Tebou, požehnaná si medzi ženami a požehnaný je plod života Tvojho, Ježiš. Svätá Mária, Matka Božia, pros za nás hriešnych teraz i v hodinu smrti našej. Amen.</div>
+        </div>
+        <div class="prayer-text">
+          Večný Otče. Prosím Ťa, prijmi drahocennú krv a vodu, ktorá vytiekla z rany Božského srdca Ježišovho pre potreby svätej Cirkvi i ako náhradu za zmierenie hriechov celého ľudstva.
+          <br><br>
+          Bože, buď k nám milostivý a milosrdný. Kristova krv, drahocenný obsah Jeho svätého Srdca, nech zmyje moje viny i viny všetkých ľudí. Voda z boku Kristovho nech mi zmyje tresty za hriechy a nech zhasí plamene očistca pre mňa i pre všetky duše v očistci.
+        </div>
+        <span class="amen">Amen.</span>
+
+        <button class="check-btn" id="finishBtn" onclick="toggleToday()" style="margin-top:20px;">
+          <span id="finishLabel">Označiť dnešný deň</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="nav-row">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>← späť</button>
+    <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">ďalej →</button>
+  </div>
+
+</div>
+
+<!-- MODAL: dátum začiatku -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Dátum začiatku</h3>
+    <p>Zadaj dátum kedy si začal s pobožnosťou.</p>
+    <input type="date" id="dateInput">
+    <div class="modal-btns">
+      <button class="modal-btn" onclick="closeModal()">Zrušiť</button>
+      <button class="modal-btn confirm" onclick="confirmDate()">Uložiť</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TOTAL = 10;
+const TOTAL_DAYS = 4380;
+let current = 0;
+let touchStartX = 0;
+let touchStartY = 0;
+let transitioning = false;
+
+function getState() {
+  try {
+    const s = localStorage.getItem('brigita_v1');
+    return s ? JSON.parse(s) : { startDate: null, doneDays: [], streak: 0 };
+  } catch(e) {
+    return { startDate: null, doneDays: [], streak: 0 };
+  }
+}
+
+function saveState(s) {
+  try { localStorage.setItem('brigita_v1', JSON.stringify(s)); } catch(e) {}
+}
+
+function today() {
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0');
+}
+
+function formatDate(d) {
+  if (!d) return 'nenastavené';
+  const p = d.split('-');
+  return p[2] + '. ' + p[1] + '. ' + p[0];
+}
+
+function calcStreak(days) {
+  if (!days || days.length === 0) return 0;
+  const t = today();
+  let streak = 0;
+  let check = t;
+  const set = new Set(days);
+  while (set.has(check)) {
+    streak++;
+    const d = new Date(check);
+    d.setDate(d.getDate() - 1);
+    check = d.getFullYear() + '-' +
+      String(d.getMonth()+1).padStart(2,'0') + '-' +
+      String(d.getDate()).padStart(2,'0');
+  }
+  return streak;
+}
+
+function toggleToday() {
+  let s = getState();
+  const t = today();
+  if (!s.startDate) {
+    s.startDate = t;
+    s.doneDays = [];
+  }
+  if (!s.doneDays) s.doneDays = [];
+  const idx = s.doneDays.indexOf(t);
+  if (idx >= 0) {
+    s.doneDays.splice(idx, 1);
+  } else {
+    s.doneDays.push(t);
+  }
+  s.doneDays.sort();
+  s.streak = calcStreak(s.doneDays);
+  saveState(s);
+  renderStats();
+}
+
+function renderStats() {
+  const s = getState();
+  const t = today();
+  const done = s.doneDays && s.doneDays.includes(t);
+  const total = s.doneDays ? s.doneDays.length : 0;
+  const left = Math.max(0, TOTAL_DAYS - total);
+  const pct = Math.min(100, (total / TOTAL_DAYS) * 100);
+  const pctRound = Math.round(pct * 10) / 10;
+  const yearNum = Math.min(12, Math.floor(total / 365) + 1);
+
+  document.getElementById('streakNum').textContent = s.streak || 0;
+  document.getElementById('daysTotal').textContent = total;
+  document.getElementById('daysLeft').textContent = left;
+  document.getElementById('startDateTag').textContent = formatDate(s.startDate);
+  document.getElementById('yearLabel').textContent = 'Rok ' + yearNum + ' z 12';
+  document.getElementById('pctLabel').textContent = pctRound + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  const todayBtn = document.getElementById('todayBtn');
+  const todayLabel = document.getElementById('todayLabel');
+  if (todayBtn) {
+    todayBtn.className = done ? 'check-btn done' : 'check-btn';
+    todayLabel.textContent = done ? '✓ Dnes splnené' : 'Označiť dnešný deň';
+  }
+
+  const finishBtn = document.getElementById('finishBtn');
+  const finishLabel = document.getElementById('finishLabel');
+  if (finishBtn) {
+    finishBtn.className = done ? 'check-btn done' : 'check-btn';
+    finishLabel.textContent = done ? '✓ Dnes splnené' : 'Označiť dnešný deň';
+  }
+}
+
+function openModal() {
+  const s = getState();
+  const inp = document.getElementById('dateInput');
+  inp.value = s.startDate || today();
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function confirmDate() {
+  const val = document.getElementById('dateInput').value;
+  if (!val) { closeModal(); return; }
+  let s = getState();
+  s.startDate = val;
+  saveState(s);
+  renderStats();
+  closeModal();
+}
+
+function buildDots() {
+  const row = document.getElementById('dotsRow');
+  row.innerHTML = '';
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === current ? ' active' : '');
+    (function(idx){ d.onclick = function(){ goTo(idx); }; })(i);
+    row.appendChild(d);
+  }
+}
+
+function navigate(dir) {
+  if (transitioning) return;
+  const newIdx = current + dir;
+  if (newIdx < 0 || newIdx >= TOTAL) return;
+  goTo(newIdx);
+}
+
+function goTo(idx) {
+  if (idx === current || transitioning) return;
+  transitioning = true;
+
+  const slides = document.querySelectorAll('.slide');
+  const dir = idx > current ? 1 : -1;
+
+  slides[current].style.transition = 'opacity 0.28s ease, transform 0.28s ease';
+  slides[current].style.opacity = '0';
+  slides[current].style.transform = dir > 0 ? 'translateX(-50px)' : 'translateX(50px)';
+
+  slides[idx].style.transition = 'none';
+  slides[idx].style.opacity = '0';
+  slides[idx].style.transform = dir > 0 ? 'translateX(50px)' : 'translateX(-50px)';
+  slides[idx].style.pointerEvents = 'all';
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      slides[idx].style.transition = 'opacity 0.28s ease, transform 0.28s ease';
+      slides[idx].style.opacity = '1';
+      slides[idx].style.transform = 'translateX(0)';
+    });
+  });
+
+  setTimeout(() => {
+    slides[current].classList.remove('active');
+    slides[current].style.cssText = '';
+    slides[idx].classList.add('active');
+    slides[idx].style.cssText = '';
+    current = idx;
+    document.getElementById('slideCounter').textContent = (current + 1) + ' / ' + TOTAL;
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === TOTAL - 1;
+    buildDots();
+    transitioning = false;
+  }, 290);
+}
+
+const sc = document.getElementById('slideContainer');
+sc.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+sc.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+    navigate(dx < 0 ? 1 : -1);
+  }
+}, { passive: true });
+
+buildDots();
+renderStats();
+</script>
+
+</body>
+</html>
