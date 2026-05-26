@@ -895,13 +895,24 @@ function renderStats() {
   const s = getState();
   const t = today();
   const done = s.doneDays && s.doneDays.includes(t);
-  const total = s.doneDays ? s.doneDays.length : 0;
+  // Vypocitat dni od datumu zaciatku ak je nastaveny
+  let total = 0;
+  let streak = 0;
+  if (s.startDate) {
+    const start = new Date(s.startDate);
+    const now = new Date(t);
+    const diffDays = Math.floor((now - start) / 86400000);
+    // Vcetaj vcera (diffDays) + dnes ak je oznaceny
+    const todayDone = s.doneDays && s.doneDays.includes(t);
+    total = Math.max(0, Math.min(diffDays + (todayDone ? 1 : 0), TOTAL_DAYS));
+    streak = total;
+  }
   const left = Math.max(0, TOTAL_DAYS - total);
   const pct = Math.min(100, (total / TOTAL_DAYS) * 100);
   const pctRound = Math.round(pct * 10) / 10;
   const yearNum = Math.min(12, Math.floor(total / 365) + 1);
 
-  document.getElementById('streakNum').textContent = s.streak || 0;
+  document.getElementById('streakNum').textContent = streak;
   document.getElementById('daysTotal').textContent = total;
   document.getElementById('daysLeft').textContent = left;
   document.getElementById('startDateTag').textContent = formatDate(s.startDate);
